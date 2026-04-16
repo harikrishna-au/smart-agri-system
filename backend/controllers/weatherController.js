@@ -2,6 +2,13 @@ const Field = require("../models/Field");
 const axios = require("axios");
 const { spawn } = require("child_process");
 
+// ✅ NEW Gemini SDK
+const { GoogleGenAI } = require("@google/genai");
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
 
 // 🌱 Crop-based extra advice
 function generateCropAdvice(crop, suggestion) {
@@ -40,7 +47,7 @@ const districtLatLonMap = {
 };
 
 
-// 🤖 ML Prediction (Python)
+// 🤖 ML Prediction
 function getMLPrediction(temp, humidity, rain) {
   return new Promise((resolve, reject) => {
 
@@ -62,48 +69,71 @@ function getMLPrediction(temp, humidity, rain) {
     });
 
     python.on("close", (code) => {
-      if (code === 0) {
-        resolve(result.trim());
-      } else {
-        reject("Prediction failed");
-      }
+      if (code === 0) resolve(result.trim());
+      else reject("Prediction failed");
     });
 
   });
 }
 
 
-// 🧠 Smart AI-like Suggestion (Fallback Logic)
+// 🤖 Gemini AI Suggestion + Fallback
 async function getAISuggestion(temp, humidity, rain, prediction, crop) {
   try {
-    let advice = "";
+    const response = await axios.post(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+      {
+        contents: [
+          {
+            parts: [
+              {
+                text: `
+Crop: ${crop}
+Temperature: ${temp}
+Humidity: ${humidity}
+Rainfall: ${rain}
 
-    if (prediction.toLowerCase().includes("heat")) {
-      advice = "Crop is under high temperature stress. Irrigate early morning or evening and avoid watering during peak sunlight hours.";
-    } 
-    else if (prediction.toLowerCase().includes("irrigation")) {
-      advice = "Soil moisture is low. Provide irrigation and regularly check soil condition to maintain crop health.";
-    } 
-    else if (prediction.toLowerCase().includes("water")) {
-      advice = "Heavy rainfall expected. Ensure proper drainage to prevent waterlogging and root damage.";
-    } 
-    else if (prediction.toLowerCase().includes("good")) {
-      advice = "Weather conditions are favorable. Continue regular farming practices and monitor crop growth.";
-    } 
-    else {
-      advice = "Crop is under moderate stress. Monitor conditions and adjust irrigation based on weather changes.";
-    }
+Prediction: ${prediction}
 
-    return advice;
+Give simple farming advice in 2 lines.
+`
+              }
+            ]
+          }
+        ]
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-goog-api-key": process.env.GEMINI_API_KEY
+        }
+      }
+    );
+
+    return response.data.candidates[0].content.parts[0].text;
 
   } catch (err) {
-    console.log("AI logic error:", err);
-    return "Unable to generate advice at this moment.";
+    console.log("Gemini REST ERROR:", err.response?.data || err.message);
+
+    // 🔥 fallback
+    let p = prediction.toLowerCase();
+
+    if (p.includes("extreme")) {
+      return "Extreme heat risk. Irrigate frequently and avoid afternoon work.";
+    } else if (p.includes("heat")) {
+      return "High temperature stress. Water crops in morning or evening.";
+    } else if (p.includes("irrigation")) {
+      return "Low soil moisture. Provide irrigation.";
+    } else if (p.includes("good")) {
+      return "Good conditions. Maintain regular farming practices.";
+    } else {
+      return "Monitor crop and adjust irrigation.";
+    }
   }
 }
 
 
-// 💾 Save real-time data (Hybrid learning)
+// 💾 Save real-time data
 function saveData(temp, humidity, rain, prediction) {
   spawn("python3", [
     "../ml-model/append_data.py",
@@ -115,22 +145,18 @@ function saveData(temp, humidity, rain, prediction) {
 }
 
 
-// 🌦 Main Controller
+// 🌦 MAIN CONTROLLER
 exports.getMyWeather = async (req, res) => {
-
   try {
 
     const farmerId = req.user.id;
     const fields = await Field.find({ farmerId });
 
-    if (!fields.length) {
-      return res.status(200).json([]);
-    }
+    if (!fields.length) return res.status(200).json([]);
 
     let weatherData = [];
 
     for (let field of fields) {
-
       try {
 
         const districtKey = field.district?.trim().toLowerCase();
@@ -150,7 +176,7 @@ exports.getMyWeather = async (req, res) => {
           continue;
         }
 
-        // 🌦 Fetch weather
+        // 🌦 Weather API
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&appid=${process.env.WEATHER_API_KEY}&units=metric`
         );
@@ -169,23 +195,16 @@ exports.getMyWeather = async (req, res) => {
           console.log("ML failed");
         }
 
-        // 🧠 AI-like Suggestion
+        // 🧠 Gemini AI
         let aiAdvice = "No advice";
 
         try {
-          await new Promise(res => setTimeout(res, 200)); // small delay
-          aiAdvice = await getAISuggestion(
-            temp,
-            humidity,
-            rain,
-            prediction,
-            field.cropName
-          );
-        } catch (err) {
-          console.log("AI ERROR:", err.message || err);
+          await new Promise(res => setTimeout(res, 200));
+          aiAdvice = await getAISuggestion(temp, humidity, rain, prediction, field.cropName);
+        } catch {
+          console.log("AI failed");
         }
 
-        // 📦 Response
         weatherData.push({
           crop: field.cropName,
           district: field.district,
@@ -197,8 +216,7 @@ exports.getMyWeather = async (req, res) => {
           confidence: prediction === "Unknown" ? "60%" : "85%"
         });
 
-      } catch (apiError) {
-
+      } catch {
         weatherData.push({
           crop: field.cropName,
           district: field.district,
@@ -209,18 +227,13 @@ exports.getMyWeather = async (req, res) => {
           suggestion: "Weather unavailable",
           confidence: "0%"
         });
-
       }
-
     }
 
     res.json(weatherData);
 
   } catch (err) {
-
     console.log("Weather Controller Error:", err);
     res.status(500).json({ error: "Weather Fetch Failed" });
-
   }
-
 };
