@@ -5,6 +5,7 @@ const items = [
   { key: "weather", label: "Weather", icon: "🌦" },
   { key: "map", label: "Field Map", icon: "🗺" },
   { key: "crops", label: "My Crops", icon: "🌱" },
+  { key: "planning", label: "Crop Planning", icon: "🧭" },
   { key: "disease", label: "Disease", icon: "📸" },
   { key: "reports", label: "Reports", icon: "📊" },
   { key: "notifications", label: "Notifications", icon: "🔔" },

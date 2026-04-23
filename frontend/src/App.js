@@ -6,6 +6,7 @@ import axios from "axios";
 import Sidebar from "./components/Sidebar";
 import Weather from "./components/Weather";
 import Crops from "./components/Crops";
+import CropPlanning from "./components/CropPlanning";
 import DiseaseDetection from "./components/Disease";
 import Reports from "./components/Reports";
 import ResearchDashboard from "./components/ResearchDashboard";
@@ -334,6 +335,7 @@ function App() {
               {section === "map" && <MapInsights role={role} />}
               {section === "weather" && <Weather />}
               {section === "crops" && <Crops />}
+              {section === "planning" && <CropPlanning />}
               {section === "disease" && <DiseaseDetection lang={lang} />}
               {section === "reports" && <Reports />}
               {section === "research" && <ResearchDashboard />}
