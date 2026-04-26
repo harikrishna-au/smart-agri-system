@@ -57,8 +57,8 @@ def predict_crop():
 
     try:
         values = [float(body[f]) for f in FEATURES]
-    except (ValueError, TypeError) as exc:
-        return jsonify({"error": f"Invalid numeric value: {exc}"}), 400
+    except (ValueError, TypeError):
+        return jsonify({"error": "All feature values must be valid numbers"}), 400
 
     data = pd.DataFrame([values], columns=FEATURES)
 

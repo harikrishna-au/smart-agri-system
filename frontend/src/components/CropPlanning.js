@@ -45,7 +45,8 @@ function MLRecommendationPanel({ fieldId }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResult(res.data);
-    } catch {
+    } catch (err) {
+      console.error("ML recommendation error:", err);
       setError("Failed to get ML recommendation");
     } finally {
       setLoading(false);
@@ -124,7 +125,8 @@ export default function CropPlanning() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setData(response.data);
-      } catch {
+      } catch (err) {
+        console.error("Crop planning fetch error:", err);
         setError("Failed to load crop planning data");
       } finally {
         setLoading(false);

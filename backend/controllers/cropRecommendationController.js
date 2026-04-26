@@ -1,4 +1,5 @@
 const axios = require("axios");
+const mongoose = require("mongoose");
 const Field = require("../models/Field");
 const { getRecommendations, buildRotationPlan } = require("../services/cropPlanningService");
 
@@ -35,7 +36,8 @@ async function getWeatherForField(field) {
       humidity:    response.data.main.humidity,
       rainfall:    response.data.rain?.["1h"] || 0,
     };
-  } catch {
+  } catch (weatherErr) {
+    console.log("Weather fetch failed for district:", field.district, weatherErr.message);
     return null;
   }
 }
@@ -50,6 +52,10 @@ exports.recommend = async (req, res) => {
 
     if (!fieldId) {
       return res.status(400).json({ message: "fieldId is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(fieldId)) {
+      return res.status(400).json({ message: "Invalid fieldId" });
     }
 
     const field = await Field.findOne({
