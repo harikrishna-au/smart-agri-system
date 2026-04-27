@@ -53,6 +53,14 @@ Backend tests were written with Node.js built-in test runner to validate:
 - Crop recommendation ranking for a realistic field profile
 - Rotation plan generation logic
 
+### 3.4 Automated ML Testing
+
+ML tests were written with Python's `unittest` framework to validate:
+
+- Crop dataset generation
+- Input validation for the crop prediction helper
+- Ranked crop prediction output from the model wrapper
+
 ## 4. Test Environment
 
 - Frontend: React 19
@@ -86,6 +94,20 @@ Covered behavior:
 - Validates crop recommendation ranking for a clay soil field with irrigation and soil test data
 - Validates crop rotation planning for repeated crops
 - Confirms next-crop suggestions are produced
+
+### 5.3 ML Test Coverage
+
+Files:
+
+- [`tests/ml/test_generate_crop_dataset.py`](./ml/test_generate_crop_dataset.py)
+- [`tests/ml/test_predict_crop.py`](./ml/test_predict_crop.py)
+
+Covered behavior:
+
+- Confirms the generated crop dataset has the expected shape and columns
+- Confirms generated feature values stay within agronomic bounds
+- Confirms valid and invalid prediction inputs are handled correctly
+- Confirms the prediction helper returns the top-ranked crop and confidence values
 
 ## 6. Sample Test Cases
 
@@ -138,10 +160,10 @@ The backend deployed on Render was verified with live requests. The service resp
 
 - Frontend automated tests: Passed
 - Backend automated tests: Passed
+- ML automated tests: Passed
 - Manual browser/API checks: Passed
 - Render deployment checks: Passed
 
 ## 9. Conclusion
 
 Testing confirmed that the Smart Agri System behaves correctly across frontend, backend, and rule-based planning logic. The system is stable for deployment because its major workflows were validated, and the environment-based frontend configuration supports separate deployment of the frontend on Vercel and backend on Render.
-
