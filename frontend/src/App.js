@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar";
 import Weather from "./components/Weather";
 import Crops from "./components/Crops";
 import CropPlanning from "./components/CropPlanning";
+import CropRotation from "./components/CropRotation";
 import DiseaseDetection from "./components/Disease";
 import Reports from "./components/Reports";
 import ResearchDashboard from "./components/ResearchDashboard";
@@ -95,27 +96,50 @@ function App() {
 
   const handleSignup = async () => {
     try {
+      const name = form.name.trim();
+      const password = form.password.trim();
+      const role = form.role;
+      const mobile = form.mobile.trim();
+      const farmerId = form.id.trim();
+      const email = form.email.trim();
+
+      if (!name || !password) {
+        alert("Name and password are required");
+        return;
+      }
+
       const payload =
-        form.role === "researcher"
+        role === "researcher"
           ? {
-              name: form.name,
-              email: form.email,
-              password: form.password,
+              name,
+              email,
+              password,
               role: "researcher",
             }
           : {
-              name: form.name,
-              mobile: form.mobile,
-              farmerId: form.id,
-              password: form.password,
+              name,
+              mobile,
+              farmerId,
+              password,
               role: "farmer",
             };
+
+      if (payload.role === "farmer" && (!payload.mobile?.trim() || !payload.farmerId?.trim())) {
+        alert("Farmer signup requires Mobile Number and Farmer ID");
+        return;
+      }
+
+      if (payload.role === "researcher" && !payload.email?.trim()) {
+        alert("Researcher signup requires Email");
+        return;
+      }
 
       const res = await axios.post(apiUrl("/api/auth/signup"), payload);
 
       alert(res.data.message);
       closeAuth();
     } catch (err) {
+      console.error("Signup failed:", err.response?.status, err.response?.data || err);
       alert(err.response?.data?.message || "Signup failed");
     }
   };
@@ -336,6 +360,7 @@ function App() {
               {section === "weather" && <Weather />}
               {section === "crops" && <Crops />}
               {section === "planning" && <CropPlanning />}
+              {section === "rotation" && <CropRotation />}
               {section === "disease" && <DiseaseDetection lang={lang} />}
               {section === "reports" && <Reports />}
               {section === "research" && <ResearchDashboard />}
@@ -411,7 +436,16 @@ const AuthPopup = ({ form, setForm, isSignup, handleSignup, handleLogin, closeAu
           <select
             className="auth-input"
             value={form.role}
-            onChange={(e) => updateField("role", e.target.value)}
+            onChange={(e) => {
+              const nextRole = e.target.value;
+              setForm((prev) => ({
+                ...prev,
+                role: nextRole,
+                mobile: nextRole === "farmer" ? prev.mobile : "",
+                id: nextRole === "farmer" ? prev.id : "",
+                email: nextRole === "researcher" ? prev.email : "",
+              }));
+            }}
           >
             <option value="farmer">{isSignup ? "Register as Farmer" : "Login as Farmer"}</option>
             <option value="researcher">{isSignup ? "Register as Researcher" : "Login as Researcher"}</option>
@@ -422,6 +456,7 @@ const AuthPopup = ({ form, setForm, isSignup, handleSignup, handleLogin, closeAu
               value={form.email}
               placeholder="Researcher Email"
               className="auth-input"
+              required
               onChange={(e) => updateField("email", e.target.value)}
             />
           ) : (
@@ -431,6 +466,7 @@ const AuthPopup = ({ form, setForm, isSignup, handleSignup, handleLogin, closeAu
                   value={form.mobile}
                   placeholder="Mobile Number"
                   className="auth-input"
+                  required
                   onChange={(e) => updateField("mobile", e.target.value)}
                 />
               )}
@@ -438,6 +474,7 @@ const AuthPopup = ({ form, setForm, isSignup, handleSignup, handleLogin, closeAu
                 value={form.id}
                 placeholder="Farmer ID"
                 className="auth-input"
+                required
                 onChange={(e) => updateField("id", e.target.value)}
               />
             </>
@@ -448,6 +485,7 @@ const AuthPopup = ({ form, setForm, isSignup, handleSignup, handleLogin, closeAu
             value={form.password}
             placeholder="Password"
             className="auth-input"
+            required
             onChange={(e) => updateField("password", e.target.value)}
           />
         </div>
