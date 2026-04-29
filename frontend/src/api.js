@@ -12,7 +12,7 @@ export { API_BASE_URL };
 // ML function
 export async function predictCrop(data) {
   try {
-    const response = await fetch("http://127.0.0.1:5000/predict", {
+    const response = await fetch(`${API_BASE_URL}/predict-crop`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
