@@ -1,4 +1,5 @@
 services:
+  # 1. Main Node.js Backend
   - type: web
     name: smart-agri-backend
     env: node
@@ -8,3 +9,15 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: ML_SERVICE_URL
+        fromService:
+          type: web
+          name: smart-agri-ml
+          property: hostport
+          
+  # 2. Machine Learning Sidecar Service
+  - type: web
+    name: smart-agri-ml
+    env: python
+    buildCommand: pip install -r ml-model/requirements.txt && pip install gunicorn
+    startCommand: env ML_PORT=$PORT gunicorn --bind 0.0.0.0:$PORT backend.app:app
