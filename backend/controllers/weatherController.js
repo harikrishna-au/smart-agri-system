@@ -2,11 +2,10 @@ const Field = require("../models/Field");
 const axios = require("axios");
 const { spawn } = require("child_process");
 
-// ✅ NEW Gemini SDK
-const { GoogleGenAI } = require("@google/genai");
+const { OpenAI } = require("openai");
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 
@@ -77,43 +76,20 @@ function getMLPrediction(temp, humidity, rain) {
 }
 
 
-// 🤖 Gemini AI Suggestion + Fallback
+// 🤖 OpenAI Suggestion + Fallback
 async function getAISuggestion(temp, humidity, rain, prediction, crop) {
   try {
-    const response = await axios.post(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
-      {
-        contents: [
-          {
-            parts: [
-              {
-                text: `
-Crop: ${crop}
-Temperature: ${temp}
-Humidity: ${humidity}
-Rainfall: ${rain}
+    const prompt = `Crop: ${crop}\nTemperature: ${temp}\nHumidity: ${humidity}\nRainfall: ${rain}\nPrediction: ${prediction}\n\nGive simple farming advice in 2 lines.`;
 
-Prediction: ${prediction}
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+    });
 
-Give simple farming advice in 2 lines.
-`
-              }
-            ]
-          }
-        ]
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-goog-api-key": process.env.GEMINI_API_KEY
-        }
-      }
-    );
-
-    return response.data.candidates[0].content.parts[0].text;
+    return response.choices[0].message.content;
 
   } catch (err) {
-    console.log("Gemini REST ERROR:", err.response?.data || err.message);
+    console.log("OpenAI ERROR:", err.message);
 
     // 🔥 fallback
     let p = prediction.toLowerCase();
