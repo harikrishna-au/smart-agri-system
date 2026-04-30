@@ -88,6 +88,8 @@ function AddField({ onClose, editData }) {
               <input value={field.district || ""} placeholder="District" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,district:e.target.value})}/>
               <input value={field.mandal || ""} placeholder="Mandal" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,mandal:e.target.value})}/>
               <input value={field.village || ""} placeholder="Village" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,village:e.target.value})}/>
+              <input value={field.latitude || ""} placeholder="Latitude (optional)" type="number" step="any" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,latitude:e.target.value})}/>
+              <input value={field.longitude || ""} placeholder="Longitude (optional)" type="number" step="any" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,longitude:e.target.value})}/>
             </div>
 
             {/* Soil */}
