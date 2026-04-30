@@ -94,21 +94,23 @@ function MLRecommendationPanel({ fieldId }) {
               )}
             </>
           ) : (
-            <p className="text-xs text-slate-500">
-              {result.mlSource === "missing_npk"
-                ? "⚠️ Add soil test data (N, P, K, pH) when registering the field to unlock ML recommendations."
-                : result.mlSource === "weather_unavailable"
-                  ? "⚠️ Live weather data unavailable for this district."
-                  : result.mlSource === "ml_unavailable"
-                    ? "⚠️ ML service offline — rule-based results are shown above."
-                    : "ML recommendation unavailable."}
-            </p>
-            {result.mlRecommendation?.debugError && (
-              <div className="mt-2 text-xs text-red-600 font-mono bg-red-50 p-2 rounded border border-red-100 break-all">
-                <p>DEBUG: {result.mlRecommendation.debugError}</p>
-                <p>URL: {result.mlRecommendation.debugUrl}</p>
-              </div>
-            )}
+            <>
+              <p className="text-xs text-slate-500">
+                {result.mlSource === "missing_npk"
+                  ? "⚠️ Add soil test data (N, P, K, pH) when registering the field to unlock ML recommendations."
+                  : result.mlSource === "weather_unavailable"
+                    ? "⚠️ Live weather data unavailable for this district."
+                    : result.mlSource === "ml_unavailable"
+                      ? "⚠️ ML service offline — rule-based results are shown above."
+                      : "ML recommendation unavailable."}
+              </p>
+              {result.mlRecommendation?.debugError && (
+                <div className="mt-2 text-xs text-red-600 font-mono bg-red-50 p-2 rounded border border-red-100 break-all">
+                  <p>DEBUG: {result.mlRecommendation.debugError}</p>
+                  <p>URL: {result.mlRecommendation.debugUrl}</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
