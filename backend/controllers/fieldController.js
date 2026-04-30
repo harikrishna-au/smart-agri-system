@@ -107,3 +107,35 @@ exports.getMapFields = async (req, res) => {
     res.status(500).json({ message: "Failed to load map fields" });
   }
 };
+
+// Update Field
+exports.updateField = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fieldName, cropName, district, village } = req.body;
+
+    if (!fieldName?.trim() || !cropName?.trim() || !district?.trim() || !village?.trim()) {
+      return res.status(400).json({
+        message: "Field name, crop name, district, and village are required",
+      });
+    }
+
+    const field = await Field.findOne({ _id: id, farmerId: req.user.id });
+
+    if (!field) {
+      return res.status(404).json({ message: "Field not found or unauthorized" });
+    }
+
+    const updatedField = await Field.findByIdAndUpdate(
+      id,
+      { ...req.body },
+      { new: true }
+    );
+
+    res.json({ message: "Field Updated Successfully", field: updatedField });
+
+  } catch (err) {
+    console.log("Update Field Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};

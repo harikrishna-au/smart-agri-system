@@ -3,27 +3,21 @@ import { useState } from "react";
 import axios from "axios";
 import { apiUrl } from "../api";
 
-function AddField({ onClose }) {
+function AddField({ onClose, editData }) {
 
-  const [field, setField] = useState({
-    fieldName: "",
-    cropName: "",
-    variety: "",
-    season: "",
-    sowingDate: "",
-    state: "",
-    district: "",
-    mandal: "",
-    latitude: "",
-    longitude: "",
-    village: "",
-    soilType: "",
-    irrigation: "",
-    area: "",
-    nitrogen: "",
-    phosphorus: "",
-    potassium: "",
-    ph: "",
+  const [field, setField] = useState(() => {
+    if (editData) {
+      return {
+        ...editData,
+        sowingDate: editData.sowingDate ? editData.sowingDate.split('T')[0] : ""
+      };
+    }
+    return {
+      fieldName: "", cropName: "", variety: "", season: "", sowingDate: "",
+      state: "", district: "", mandal: "", latitude: "", longitude: "",
+      village: "", soilType: "", irrigation: "", area: "",
+      nitrogen: "", phosphorus: "", potassium: "", ph: "",
+    };
   });
 
   const handleSubmit = async () => {
@@ -43,17 +37,22 @@ function AddField({ onClose }) {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.post(apiUrl("/api/field/add"), payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      alert("Field added successfully");
+      if (editData) {
+        await axios.put(apiUrl("/api/field/update/" + editData._id), payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert("Field updated successfully");
+      } else {
+        await axios.post(apiUrl("/api/field/add"), payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert("Field added successfully");
+      }
+      
       onClose();
     } catch (err) {
-      console.error("Add field failed:", err.response?.status, err.response?.data || err);
-      alert(err.response?.data?.message || "Failed to Add Field ❌");
+      console.error("Save field failed:", err.response?.status, err.response?.data || err);
+      alert(err.response?.data?.message || "Failed to Save Field ❌");
     }
   };
 
@@ -69,43 +68,43 @@ function AddField({ onClose }) {
       >
 
         <div className="flex h-full max-h-[calc(90vh-3rem)] flex-col">
-          <h2 className="mb-4 text-2xl font-bold text-center">🌾 Add New Field</h2>
+          <h2 className="mb-4 text-2xl font-bold text-center">🌾 {editData ? "Edit Field" : "Add New Field"}</h2>
 
           <div className="flex-1 overflow-y-auto pr-1">
             {/* Crop Section */}
             <h3 className="mb-2 font-semibold">🌱 Crop Details</h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              <input placeholder="Field Name" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,fieldName:e.target.value})}/>
-              <input placeholder="Crop Name" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,cropName:e.target.value})}/>
-              <input placeholder="Variety" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,variety:e.target.value})}/>
-              <input placeholder="Season" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,season:e.target.value})}/>
-              <input type="date" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,sowingDate:e.target.value})}/>
+              <input value={field.fieldName || ""} placeholder="Field Name" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,fieldName:e.target.value})}/>
+              <input value={field.cropName || ""} placeholder="Crop Name" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,cropName:e.target.value})}/>
+              <input value={field.variety || ""} placeholder="Variety" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,variety:e.target.value})}/>
+              <input value={field.season || ""} placeholder="Season" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,season:e.target.value})}/>
+              <input value={field.sowingDate || ""} type="date" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,sowingDate:e.target.value})}/>
             </div>
 
             {/* Location */}
             <h3 className="mt-5 mb-2 font-semibold">📍 Location</h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              <input placeholder="State" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,state:e.target.value})}/>
-              <input placeholder="District" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,district:e.target.value})}/>
-              <input placeholder="Mandal" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,mandal:e.target.value})}/>
-              <input placeholder="Village" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,village:e.target.value})}/>
+              <input value={field.state || ""} placeholder="State" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,state:e.target.value})}/>
+              <input value={field.district || ""} placeholder="District" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,district:e.target.value})}/>
+              <input value={field.mandal || ""} placeholder="Mandal" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,mandal:e.target.value})}/>
+              <input value={field.village || ""} placeholder="Village" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,village:e.target.value})}/>
             </div>
 
             {/* Soil */}
             <h3 className="mt-5 mb-2 font-semibold">💧 Field Details</h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              <input placeholder="Soil Type" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,soilType:e.target.value})}/>
-              <input placeholder="Irrigation Type" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,irrigation:e.target.value})}/>
-              <input placeholder="Area (Acres)" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,area:e.target.value})}/>
+              <input value={field.soilType || ""} placeholder="Soil Type" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,soilType:e.target.value})}/>
+              <input value={field.irrigation || ""} placeholder="Irrigation Type" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,irrigation:e.target.value})}/>
+              <input value={field.area || ""} placeholder="Area (Acres)" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,area:e.target.value})}/>
             </div>
 
             {/* Soil Test Data */}
             <h3 className="mt-5 mb-2 font-semibold">🧪 Soil Test Data <span className="text-sm font-normal text-slate-400">(optional — improves crop recommendations)</span></h3>
             <div className="grid gap-3 sm:grid-cols-2">
-              <input placeholder="Nitrogen content (kg/ha)" type="number" min="0" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,nitrogen:e.target.value})}/>
-              <input placeholder="Phosphorus content (kg/ha)" type="number" min="0" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,phosphorus:e.target.value})}/>
-              <input placeholder="Potassium content (kg/ha)" type="number" min="0" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,potassium:e.target.value})}/>
-              <input placeholder="Soil pH (0–14)" type="number" min="0" max="14" step="0.1" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,ph:e.target.value})}/>
+              <input value={field.nitrogen || ""} placeholder="Nitrogen content (kg/ha)" type="number" min="0" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,nitrogen:e.target.value})}/>
+              <input value={field.phosphorus || ""} placeholder="Phosphorus content (kg/ha)" type="number" min="0" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,phosphorus:e.target.value})}/>
+              <input value={field.potassium || ""} placeholder="Potassium content (kg/ha)" type="number" min="0" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,potassium:e.target.value})}/>
+              <input value={field.ph || ""} placeholder="Soil pH (0–14)" type="number" min="0" max="14" step="0.1" className="input !mb-0 !py-2.5" onChange={(e)=>setField({...field,ph:e.target.value})}/>
             </div>
           </div>
 

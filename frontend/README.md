@@ -56,7 +56,7 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
 PORT=5312
 WEATHER_API_KEY=your_openweather_api_key
-GEMINI_API_KEY=your_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key
 
 cd frontend
 npm install

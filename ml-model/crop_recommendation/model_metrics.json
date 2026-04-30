@@ -1,5 +1,5 @@
 {
-  "trained_at": "2026-04-27T01:37:54.072222+00:00",
+  "trained_at": "2026-04-30T01:44:08.047060+00:00",
   "model_type": "Pipeline(StandardScaler + RandomForestClassifier)",
   "n_classes": 22,
   "class_names": [

@@ -14,10 +14,29 @@ services:
           type: web
           name: smart-agri-ml
           property: hostport
+      - key: CORS_ORIGIN
+        fromService:
+          type: web
+          name: smart-agri-frontend
+          property: url
           
   # 2. Machine Learning Sidecar Service
   - type: web
     name: smart-agri-ml
     env: python
-    buildCommand: pip install -r ml-model/requirements.txt && pip install gunicorn
+    buildCommand: pip install -r ml-model/requirements.txt && pip install gunicorn && python ml-model/crop_recommendation/train_crop_model.py
     startCommand: env ML_PORT=$PORT gunicorn --bind 0.0.0.0:$PORT backend.app:app
+
+  # 3. React Frontend
+  - type: web
+    name: smart-agri-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_BASE_URL
+        fromService:
+          type: web
+          name: smart-agri-backend
+          property: url

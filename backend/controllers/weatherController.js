@@ -79,11 +79,13 @@ function getMLPrediction(temp, humidity, rain) {
 // 🤖 OpenAI Suggestion + Fallback
 async function getAISuggestion(temp, humidity, rain, prediction, crop) {
   try {
-    const prompt = `Crop: ${crop}\nTemperature: ${temp}\nHumidity: ${humidity}\nRainfall: ${rain}\nPrediction: ${prediction}\n\nGive simple farming advice in 2 lines.`;
+    const prompt = `Crop: ${crop}\nTemp: ${temp}\nHumidity: ${humidity}\nRain: ${rain}\nPrediction: ${prediction}\n\nGive farming advice in 1 short sentence (max 15 words).`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
+      max_tokens: 30,
+      temperature: 0.3,
     });
 
     return response.choices[0].message.content;
@@ -171,7 +173,7 @@ exports.getMyWeather = async (req, res) => {
           console.log("ML failed");
         }
 
-        // 🧠 Gemini AI
+        // 🧠 OpenAI
         let aiAdvice = "No advice";
 
         try {
