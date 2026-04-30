@@ -98,10 +98,10 @@ function MLRecommendationPanel({ fieldId }) {
               {result.mlSource === "missing_npk"
                 ? "⚠️ Add soil test data (N, P, K, pH) when registering the field to unlock ML recommendations."
                 : result.mlSource === "weather_unavailable"
-                ? "⚠️ Live weather data unavailable for this district."
-                : result.mlSource === "ml_unavailable"
-                ? "⚠️ ML service offline — rule-based results are shown above."
-                : "ML recommendation unavailable."}
+                  ? "⚠️ Live weather data unavailable for this district."
+                  : result.mlSource === "ml_unavailable"
+                    ? "⚠️ ML service offline — rule-based results are shown above."
+                    : "ML recommendation unavailable."}
             </p>
           )}
         </div>
