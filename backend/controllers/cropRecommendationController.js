@@ -24,7 +24,10 @@ const mongoose = require("mongoose");
 const Field    = require("../models/Field");
 const { getRecommendations, buildRotationPlan } = require("../services/cropPlanningService");
 
-const ML_SERVICE_URL   = process.env.ML_SERVICE_URL || "http://localhost:5401";
+let ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:5401";
+if (ML_SERVICE_URL && !ML_SERVICE_URL.startsWith("http")) {
+  ML_SERVICE_URL = `http://${ML_SERVICE_URL}`;
+}
 const ML_TIMEOUT_MS    = 5000;
 const WEATHER_TIMEOUT_MS = 5000;
 const MIN_ML_CONFIDENCE  = 0.35;   // discard ML result if below this threshold
