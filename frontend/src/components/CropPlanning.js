@@ -103,6 +103,12 @@ function MLRecommendationPanel({ fieldId }) {
                     ? "⚠️ ML service offline — rule-based results are shown above."
                     : "ML recommendation unavailable."}
             </p>
+            {result.mlRecommendation?.debugError && (
+              <div className="mt-2 text-xs text-red-600 font-mono bg-red-50 p-2 rounded border border-red-100 break-all">
+                <p>DEBUG: {result.mlRecommendation.debugError}</p>
+                <p>URL: {result.mlRecommendation.debugUrl}</p>
+              </div>
+            )}
           )}
         </div>
       )}

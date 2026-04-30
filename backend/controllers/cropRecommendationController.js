@@ -355,6 +355,7 @@ exports.recommend = async (req, res) => {
         } catch (mlErr) {
           console.log(`[CropRec] ML service unreachable: ${mlErr.message}`);
           mlSource = "ml_unavailable";
+          mlRecommendation = { debugError: mlErr.message, debugUrl: ML_SERVICE_URL };
         }
       }
     }
