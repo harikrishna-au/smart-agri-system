@@ -4,7 +4,8 @@ const router = express.Router();
 const diseaseController = require("../controllers/diseaseController");
 const { requireAuth, requireRole } = require("../middleware/authMiddleware");
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // Farmer sends report (with image upload support)
 router.post(

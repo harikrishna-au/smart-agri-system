@@ -4,7 +4,10 @@ export function apiUrl(path) {
 }
 
 export function assetUrl(path) {
-  return `${API_BASE_URL}${path}`;
+  if (!path) return "";
+  if (path.startsWith("data:")) return path;
+  if (path.startsWith("http")) return path;
+  return `${API_BASE_URL}/${path.startsWith("/") ? path.slice(1) : path}`;
 }
 
 export { API_BASE_URL };

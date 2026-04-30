@@ -6,7 +6,11 @@ const { createNotification, notifyAllResearchers } = require("../services/notifi
 exports.reportDisease = async (req, res) => {
   try {
     const { crop, location, problem, symptomLocation, spread, weather } = req.body;
-    let image = req.file ? req.file.path : "";
+    let image = "";
+    if (req.file) {
+      const b64 = req.file.buffer.toString("base64");
+      image = `data:${req.file.mimetype};base64,${b64}`;
+    }
     const farmerId = req.user.id;
 
     if (!crop?.trim() || !location?.trim() || !problem || !symptomLocation || !spread || !weather) {
