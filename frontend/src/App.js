@@ -50,6 +50,7 @@ function App() {
       setUser(savedUser);
       setRole(savedRole);
       if (page !== "dashboard") {
+        setPage("dashboard");
         setSection("overview");
       }
       return;
